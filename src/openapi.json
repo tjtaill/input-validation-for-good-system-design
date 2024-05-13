@@ -1,0 +1,141 @@
+{
+    "components": {
+        "schemas": {
+            "Message": {
+                "properties": {
+                    "text": {
+                        "maxLength": 50,
+                        "minLength": 1,
+                        "title": "Text",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "text"
+                ],
+                "title": "Message",
+                "type": "object"
+            },
+            "Profile": {
+                "example": {
+                    "age": 25,
+                    "name": "John Doe"
+                },
+                "properties": {
+                    "age": {
+                        "description": "Age of the user",
+                        "exclusiveMaximum": 130,
+                        "exclusiveMinimum": 0,
+                        "title": "Age",
+                        "type": "integer"
+                    },
+                    "name": {
+                        "maxLength": 50,
+                        "minLength": 1,
+                        "title": "Name",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "name",
+                    "age"
+                ],
+                "title": "Profile",
+                "type": "object"
+            },
+            "ValidationError": {
+                "description": "Model of a validation error response.",
+                "items": {
+                    "$ref": "#/components/schemas/ValidationErrorElement"
+                },
+                "title": "ValidationError",
+                "type": "array"
+            },
+            "ValidationErrorElement": {
+                "description": "Model of a validation error response element.",
+                "properties": {
+                    "ctx": {
+                        "title": "Error context",
+                        "type": "object"
+                    },
+                    "loc": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "title": "Missing field name",
+                        "type": "array"
+                    },
+                    "msg": {
+                        "title": "Error message",
+                        "type": "string"
+                    },
+                    "type": {
+                        "title": "Error type",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "title": "ValidationErrorElement",
+                "type": "object"
+            }
+        }
+    },
+    "info": {
+        "title": "Service API Document",
+        "version": "0.1"
+    },
+    "openapi": "3.0.3",
+    "paths": {
+        "/api/v1/user": {
+            "post": {
+                "description": "",
+                "operationId": "createUser",
+                "parameters": [],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Profile"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Message"
+                                }
+                            }
+                        },
+                        "description": "Created"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        },
+                        "description": "Unprocessable Entity"
+                    }
+                },
+                "summary": "create_user <POST>",
+                "tags": [
+                    "api"
+                ]
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "api"
+        }
+    ]
+}

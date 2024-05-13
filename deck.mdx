@@ -1,0 +1,235 @@
+import {
+  CodeSurfer,
+  CodeSurferColumns,
+  Step,
+} from "code-surfer";
+
+import qrcode from "./public/images/qr-code.png";
+import alaya from "./public/images/alaya.jpg";
+
+
+<img src={alaya} />
+
+---
+
+#### Materials for Presentation
+
+1. https://github.com/tjtaill/input-validation-for-good-system-design
+
+<img src={qrcode} />
+
+---
+
+#### Input Validation for Good System Design
+
+1. The TLDR; input validation is a precondition of good system design.
+2. For purposes of this talk system refers to functions, methods, REST APIs and databases.
+3. Techniques for input validation in Python and SQL.
+
+---
+
+# Input Validation
+
+1. Checking that all preconditions are valid (system inputs and system state)
+2. Explaining to the system consumer any violations of preconditions
+
+---
+
+# What happens to a software system when input is not validated?
+
+1. Complexity increases due to duplicated defensive programming.
+2. Failures are **Slow** meaning failures occur far from the source of the problem harder to debug
+3. System Consumers (users, developers) are frustrated hard to use, easy to misuse features and mysterious failures
+4. The ability to develop future features is compromised.
+
+---
+
+# Methods and Functions Arguments
+
+A lot of basic types we use lack clarity and do not have the correct flexibility.
+
+| Type | Flexibility | Clarity | Alternatives |
+|------|-------------|---------|--------------|
+| String | Over | Low | * |
+| Dict | Over | Low | dataclasses, TypedDict |
+| Tuple | Fine | Low | NamedTuple, dataclasses |
+| Boolean | Under | Low | Enum |
+
+---
+
+# Value (Small/Tiny) Objects Pattern
+
+1. The represent values quantities like money, dates, times, distances
+2. Immutable and have no unique identity (they are not Entities)
+3. Enforce validity are great for input validation without duplication
+4. Support fail fast style of programming (alternate is defensive programming fail slow)
+
+---
+
+<CodeSurfer>
+
+  ```py 1:9 title="Value Object Pattern Motivation" file="./src/s3_path.py"
+  ```
+
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+  ```py 1:24 title="Value Object Example 1" file="./src/s3_path2.py"
+  ```
+
+  ```py 8,19:20 title="Immutability a bit Cludgy" file="./src/s3_path2.py"
+  ```
+
+  ```py 23 title="Different Types prevent call errors" file="./src/s3_path2.py"
+  ```
+
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+  ```py title="Value Object Motivation 2" file="./src/time_range1.py"
+  ```
+
+  ```py 4:8 title="Innapropriate Types Leave a Heavy Burden on System" file="./src/time_range1.py"
+  ```
+
+  ```py 11:13 title="Better but not we can do better" file="./src/time_range1.py"
+  ```
+
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+  ```py title="Value Object with pydantic" file="./src/time_range2.py"
+  ```
+
+  ```py 1:15 title="pydantic" file="./src/time_range2.py"
+  ```
+
+  ```py 14:15 title="making immutable less cludgy than dataclasses" file="./src/time_range2.py"
+  ```
+
+  ```py 18:18 title="pydantic can generate json schema for client side validation" file="./src/time_range2.py"
+  ```
+
+  ```py 21:22 title="validation burden is gone" file="./src/time_range2.py"
+  ```
+
+</CodeSurfer>
+
+---
+
+# Input Validation for REST API
+
+After UI this is the second most important place to validate input, in some
+cases being strict in what your REST API will accept forces UI to be strict as well.
+
+---
+
+# Two Styles for REST API Input Validation
+
+1. **Code First** validation is specified in code and json schema/openapi doc is 
+generated from code. Example flask-pydantic-spec. 
+2. **Spec first** validation is specified in json schema/openapi doc loaded into validator for validation.
+Example connexion flask.
+
+---
+
+<CodeSurfer>
+
+  ```py title="flask-pydantic-spec example" file="./src/code_first.py"
+  ```
+  
+  ```py 1,7:19 title="Pydantic Models" file="./src/code_first.py"
+  ```
+
+  ```py 2:4,21:38 title="Flask and extension" file="./src/code_first.py"
+  ```
+
+  ```py 32 title="Output Json Schema different than Pydantic" file="./src/code_first.py"
+  ```
+
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+  ```json title="Large OPEN API JSON Generated Not Easy to Use with JSON Validators" file="./src/openapi.json"
+  ```
+
+  ```json 19:45 title="Getting Just Request into Validator not Easy" file="./src/openapi.json"
+  ```
+
+</CodeSurfer>
+
+---
+
+# Input Validation for SQL
+
+Often having multiple layers above it (UI, backend) being strict in the database layers can force
+layers above it to be strict as well. Accepting bad inputs into databases can
+lead to useless fields and makes data analyst/scientist job very difficult. Backend has 
+to write a logic to deal with bad data that it is querying.
+
+---
+
+<CodeSurfer>
+
+  ```sql title="SQL DDL input validation constraints and checks" file="./src/ddl_constraints.sql"
+  ```
+
+  ```sql 3:4,11 title="CONSTRAINT and CHECK mechanism" file="./src/ddl_constraints.sql"
+  ```
+
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+  ```py title="sqlaclhemy old style constraints" file="./src/sqlalchemy_constraints.py"
+  ```
+
+  ```py 17:18,27 title="Older Style with strings" file="./src/sqlalchemy_constraints.py"
+  ```
+
+</CodeSurfer>
+
+---
+
+
+<CodeSurfer>
+
+  ```py title="sqlaclhemy new style constraints" file="./src/sqlalchemy_constraints2.py"
+  ```
+
+  ```py 10,24 title="Newer Style with expressions" file="./src/sqlalchemy_constraints2.py"
+  ```
+
+  ```py 2,12:16 title="Code Validation not database level" file="./src/sqlalchemy_constraints2.py"
+  ```  
+
+</CodeSurfer>
+
+---
+
+# Summary of Input Validation Advice
+
+1. Do It or bad inputs will forever rule your destiny (system)
+2. Avoid using overly flexible types like string, dicts, tuples these
+make code harder to understand and maintain.
+3. Avoid using inflexible types like boolean use enums instead they are clearer and more extendable.
+4. Large number of inputs means your system (gui, function, method, db) is too complex and
+ should be split into smaller systems
+5. Good input validation has postive effects on system design in all directions simplifying
+systems in layers below and forcing layers above to also validate their inputs.
+6. Value Object Pattern is a great way to enforce input validation without duplication.
+7. Good Input Validation makes your system easy to use and hard to misuse.
